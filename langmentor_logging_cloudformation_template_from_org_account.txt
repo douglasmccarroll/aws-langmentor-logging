@@ -1,0 +1,135 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Resources": {
+    "tableLangMentorLogMessages": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "MessageId",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "MessageId",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits": "5",
+          "WriteCapacityUnits": "5"
+        }
+      }
+    },
+    "topicDefaultCloudWatchAlarmsTopic": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "Default_CloudWatch_Alarms_Topic",
+        "Subscription": [
+          {
+            "Endpoint": "org.aws-langcollab-organization.001@brightworks.com",
+            "Protocol": "email"
+          }
+        ]
+      }
+    },
+    "topicLangMentorLogMessage": {
+      "Type": "AWS::SNS::Topic",
+      "Properties": {
+        "DisplayName": "LangMentorLogMessage",
+        "Subscription": [
+          {
+            "Endpoint": "aws-sms-langmentorlogmessages@languagecollaborative.com",
+            "Protocol": "email"
+          }
+        ]
+      }
+    },
+    "snspolicyDefaultCloudWatchAlarmsTopic": {
+      "Type": "AWS::SNS::TopicPolicy",
+      "Properties": {
+        "Topics": [
+          {
+            "Ref": "topicDefaultCloudWatchAlarmsTopic"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2008-10-17",
+          "Id": "__default_policy_ID",
+          "Statement": [
+            {
+              "Sid": "__default_statement_ID",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Action": [
+                "SNS:GetTopicAttributes",
+                "SNS:SetTopicAttributes",
+                "SNS:AddPermission",
+                "SNS:RemovePermission",
+                "SNS:DeleteTopic",
+                "SNS:Subscribe",
+                "SNS:ListSubscriptionsByTopic",
+                "SNS:Publish",
+                "SNS:Receive"
+              ],
+              "Resource": {
+                "Ref": "topicDefaultCloudWatchAlarmsTopic"
+              },
+              "Condition": {
+                "StringEquals": {
+                  "AWS:SourceOwner": "087546598769"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "snspolicyLangMentorLogMessage": {
+      "Type": "AWS::SNS::TopicPolicy",
+      "Properties": {
+        "Topics": [
+          {
+            "Ref": "topicLangMentorLogMessage"
+          }
+        ],
+        "PolicyDocument": {
+          "Version": "2008-10-17",
+          "Id": "__default_policy_ID",
+          "Statement": [
+            {
+              "Sid": "__default_statement_ID",
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              },
+              "Action": [
+                "SNS:GetTopicAttributes",
+                "SNS:SetTopicAttributes",
+                "SNS:AddPermission",
+                "SNS:RemovePermission",
+                "SNS:DeleteTopic",
+                "SNS:Subscribe",
+                "SNS:ListSubscriptionsByTopic",
+                "SNS:Publish",
+                "SNS:Receive"
+              ],
+              "Resource": {
+                "Ref": "topicLangMentorLogMessage"
+              },
+              "Condition": {
+                "StringEquals": {
+                  "AWS:SourceOwner": "087546598769"
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  },
+  "Description": "LangMentor Logging - Api Gateway, Lambda, SNS"
+}

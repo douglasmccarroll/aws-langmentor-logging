@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS SAM Template for LangCollab Logging
+
+Globals:
+  Function:
+    Timeout: 10
+
+Resources:
+  LogMessageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: log_message/
+      Handler: app.lambda_handler
+      Runtime: python3.7
+      Policies:
+        - SNSPublishMessagePolicy:
+            TopicName: !GetAtt LangMentorLogMessageTopic.TopicName
+      Environment:
+        Variables:
+          SNS_TOPIC_ARN: !Ref LangMentorLogMessageTopic
+      Events:
+        LangMentorLogMessage:
+          Type: Api 
+          Properties:
+            Path: /langmentor_log_message
+            Method: post
+  LangMentorLogMessageTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: org.aws-langcollab-organization.001@brightworks.com
+          Protocol: email
+
+Outputs:
+  LangMentorLogMessageApi:
+    Description: "API Gateway endpoint URL for Prod stage for LangMentorLogMessage"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/langmentor_log_message/"
+  LogMessageFunction:
+    Description: "LogMessageFunction ARN"
+    Value: !GetAtt LogMessageFunction.Arn
+  LogMessageFunctionIamRole:
+    Description: "Implicit IAM Role created for LogMessageFunction"
+    Value: !GetAtt LogMessageFunctionRole.Arn
